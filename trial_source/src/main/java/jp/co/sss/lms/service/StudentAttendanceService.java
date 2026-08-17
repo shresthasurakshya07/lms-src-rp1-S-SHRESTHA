@@ -74,6 +74,24 @@ public class StudentAttendanceService {
 	}
 
 	/**
+	 * 過去日の未入力チェック
+	 *
+	 * @return 過去日の未入力がある場合true
+	 */
+	public boolean hasMissingPastAttendance() {
+
+		Date currentDate = new Date();
+
+		Integer missingCount = tStudentAttendanceMapper.countMissingAttendance(
+				loginUserDto.getCourseId(),
+				loginUserDto.getLmsUserId(),
+				currentDate,
+				Constants.DB_FLG_FALSE);
+
+		return missingCount != null && missingCount > 0;
+	}
+
+	/**
 	 * 出退勤更新前のチェック
 	 * 
 	 * @param attendanceType

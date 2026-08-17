@@ -42,14 +42,26 @@ public class AttendanceController {
 	@RequestMapping(path = "/detail", method = RequestMethod.GET)
 	public String index(Model model) {
 
-		// 勤怠一覧の取得
-		List<AttendanceManagementDto> attendanceManagementDtoList = studentAttendanceService
-				.getAttendanceManagement(loginUserDto.getCourseId(), loginUserDto.getLmsUserId());
-		model.addAttribute("attendanceManagementDtoList", attendanceManagementDtoList);
+	    // 勤怠一覧の取得
+	    List<AttendanceManagementDto> attendanceManagementDtoList =
+	            studentAttendanceService.getAttendanceManagement(
+	                    loginUserDto.getCourseId(),
+	                    loginUserDto.getLmsUserId());
 
-		return "attendance/detail";
+	    model.addAttribute("attendanceManagementDtoList",
+	            attendanceManagementDtoList);
+
+	    // 過去日の未入力確認
+	    boolean hasMissingPastAttendance =
+	            studentAttendanceService.hasMissingPastAttendance();
+
+	    model.addAttribute("hasMissingPastAttendance",
+	            hasMissingPastAttendance);
+
+	    return "attendance/detail";
 	}
 
+	
 	/**
 	 * 勤怠管理画面 『出勤』ボタン押下
 	 * 
@@ -99,6 +111,7 @@ public class AttendanceController {
 
 		return "attendance/detail";
 	}
+	
 
 	/**
 	 * 勤怠管理画面 『勤怠情報を直接編集する』リンク押下

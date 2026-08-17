@@ -40,6 +40,25 @@
 		ORDER BY t2.date ASC
 	</select>
 
+
+
+
+<select id="countMissingAttendance" resultType="int">
+	SELECT COUNT(DISTINCT CAST(t1.date AS DATE))
+	FROM m_section t1
+	LEFT OUTER JOIN t_student_attendance t2
+		ON t2.lms_user_id = #{lmsUserId}
+		AND CAST(t1.date AS DATE) = CAST(t2.training_date AS DATE)
+		AND t2.delete_flg = #{deleteFlg}
+	WHERE t1.course_id = #{courseId}
+		AND t1.date &lt; #{currentDate}
+		AND t1.delete_flg = #{deleteFlg}
+		AND t2.student_attendance_id IS NULL
+</select>
+
+
+
+
 	<insert id="insert" parameterType="jp.co.sss.lms.entity.TStudentAttendance" useGeneratedKeys="true" keyProperty="studentAttendanceId">
 		INSERT INTO t_student_attendance 
 		(
