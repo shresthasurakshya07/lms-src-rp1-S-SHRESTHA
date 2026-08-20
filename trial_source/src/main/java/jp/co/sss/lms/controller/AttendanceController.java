@@ -14,8 +14,8 @@ import jp.co.sss.lms.dto.AttendanceManagementDto;
 import jp.co.sss.lms.dto.LoginUserDto;
 import jp.co.sss.lms.form.AttendanceForm;
 import jp.co.sss.lms.service.StudentAttendanceService;
+import jp.co.sss.lms.util.AttendanceUtil;
 import jp.co.sss.lms.util.Constants;
-
 /**
  * 勤怠管理コントローラ
  * 
@@ -23,6 +23,7 @@ import jp.co.sss.lms.util.Constants;
  */
 @Controller
 @RequestMapping("/attendance")
+
 public class AttendanceController {
 
 	@Autowired
@@ -51,7 +52,7 @@ public class AttendanceController {
 	    model.addAttribute("attendanceManagementDtoList",
 	            attendanceManagementDtoList);
 
-	    // 過去日の未入力確認
+	    // スレスタスラクサ　task.25 過去日の未入力確認
 	    boolean hasMissingPastAttendance =
 	            studentAttendanceService.hasMissingPastAttendance();
 
@@ -125,9 +126,15 @@ public class AttendanceController {
 		// 勤怠管理リストの取得
 		List<AttendanceManagementDto> attendanceManagementDtoList = studentAttendanceService
 				.getAttendanceManagement(loginUserDto.getCourseId(), loginUserDto.getLmsUserId());
-		// 勤怠フォームの生成
+		// スレスタスラクサ　task.26 勤怠フォームの生成
 		AttendanceForm attendanceForm = studentAttendanceService
 				.setAttendanceForm(attendanceManagementDtoList);
+		AttendanceUtil attendanceUtil = new AttendanceUtil();
+		attendanceForm.setBlankTimes(attendanceUtil.setBlankTime());
+
+		attendanceForm.setHourMap(attendanceUtil.setHour());
+
+		attendanceForm.setMinuteMap(attendanceUtil.setMinute());
 		model.addAttribute("attendanceForm", attendanceForm);
 
 		return "attendance/update";
