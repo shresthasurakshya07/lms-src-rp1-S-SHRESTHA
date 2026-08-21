@@ -73,7 +73,8 @@ public interface TStudentAttendanceMapper {
 	 * @param deleteFlg
 	 * @return 過去日の未入力件数
 	 */
-	Integer countMissingAttendance(
+//	Task 25
+	Integer noEnterCount(
 			@Param("courseId") Integer courseId,
 			@Param("lmsUserId") Integer lmsUserId,
 			@Param("currentDate") Date currentDate,

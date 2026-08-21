@@ -151,17 +151,43 @@ public class AttendanceController {
 	 */
 	@RequestMapping(path = "/update", params = "complete", method = RequestMethod.POST)
 	public String complete(AttendanceForm attendanceForm, Model model, BindingResult result)
-			throws ParseException {
+	        throws ParseException {
 
-		// 更新
-		String message = studentAttendanceService.update(attendanceForm);
-		model.addAttribute("message", message);
-		// 一覧の再取得
-		List<AttendanceManagementDto> attendanceManagementDtoList = studentAttendanceService
-				.getAttendanceManagement(loginUserDto.getCourseId(), loginUserDto.getLmsUserId());
-		model.addAttribute("attendanceManagementDtoList", attendanceManagementDtoList);
+	    // Task.26: 時・分をhh:mm形式に変換　スレスタスラクサ
+	    attendanceForm.getAttendanceList().forEach(dailyAttendanceForm -> {
 
-		return "attendance/detail";
+	        if (dailyAttendanceForm.getTrainingStartTimeHour() != null
+	                && dailyAttendanceForm.getTrainingStartTimeMinute() != null) {
+
+	            dailyAttendanceForm.setTrainingStartTime(
+	                    String.format("%02d:%02d",
+	                            dailyAttendanceForm.getTrainingStartTimeHour(),
+	                            dailyAttendanceForm.getTrainingStartTimeMinute()));
+	        }
+
+	        if (dailyAttendanceForm.getTrainingEndTimeHour() != null
+	                && dailyAttendanceForm.getTrainingEndTimeMinute() != null) {
+
+	            dailyAttendanceForm.setTrainingEndTime(
+	                    String.format("%02d:%02d",
+	                            dailyAttendanceForm.getTrainingEndTimeHour(),
+	                            dailyAttendanceForm.getTrainingEndTimeMinute()));
+	        }
+	    });
+
+	    // 更新
+	    String message = studentAttendanceService.update(attendanceForm);
+	    model.addAttribute("message", message);
+
+	    // 一覧の再取得
+	    List<AttendanceManagementDto> attendanceManagementDtoList =
+	            studentAttendanceService.getAttendanceManagement(
+	                    loginUserDto.getCourseId(),
+	                    loginUserDto.getLmsUserId());
+
+	    model.addAttribute("attendanceManagementDtoList", attendanceManagementDtoList);
+
+	    return "attendance/detail";
 	}
 
 }

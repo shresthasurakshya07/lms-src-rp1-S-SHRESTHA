@@ -41,9 +41,9 @@
 	</select>
 
 
+<!--Task 25　スレスタ　スラクサ　-->
 
-
-<select id="countMissingAttendance" resultType="int">
+<select id="noEnterCount" resultType="int">
 	SELECT COUNT(DISTINCT CAST(t1.date AS DATE))
 	FROM m_section t1
 	LEFT OUTER JOIN t_student_attendance t2
@@ -55,9 +55,6 @@
 		AND t1.delete_flg = #{deleteFlg}
 		AND t2.student_attendance_id IS NULL
 </select>
-
-
-
 
 	<insert id="insert" parameterType="jp.co.sss.lms.entity.TStudentAttendance" useGeneratedKeys="true" keyProperty="studentAttendanceId">
 		INSERT INTO t_student_attendance 
