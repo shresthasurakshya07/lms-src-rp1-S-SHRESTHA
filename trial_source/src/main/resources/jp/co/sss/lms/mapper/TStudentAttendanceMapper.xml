@@ -43,7 +43,7 @@
 
 <!--Task 25　スレスタ　スラクサ　-->
 
-<select id="noEnterCount" resultType="int">
+<select id="notEnterCount" resultType="int">
 	SELECT COUNT(DISTINCT CAST(t1.date AS DATE))
 	FROM m_section t1
 	LEFT OUTER JOIN t_student_attendance t2

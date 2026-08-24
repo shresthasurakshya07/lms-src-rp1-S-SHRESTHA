@@ -74,7 +74,7 @@ public interface TStudentAttendanceMapper {
 	 * @return 過去日の未入力件数
 	 */
 //	Task 25
-	Integer noEnterCount(
+	Integer notEnterCount(
 			@Param("courseId") Integer courseId,
 			@Param("lmsUserId") Integer lmsUserId,
 			@Param("currentDate") Date currentDate,

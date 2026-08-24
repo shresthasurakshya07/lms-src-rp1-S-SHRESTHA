@@ -85,7 +85,7 @@ public class StudentAttendanceService {
 	    Date currentDate = new Date();
 
 	    // 未入力件数を取得
-	    Integer notEnterCount = tStudentAttendanceMapper.noEnterCount(
+	    Integer notEnterCount = tStudentAttendanceMapper.notEnterCount(
 	            loginUserDto.getCourseId(),
 	            loginUserDto.getLmsUserId(),
 	            currentDate,

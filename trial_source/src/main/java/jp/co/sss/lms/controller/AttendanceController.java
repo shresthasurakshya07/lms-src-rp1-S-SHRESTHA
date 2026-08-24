@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import jp.co.sss.lms.dto.AttendanceManagementDto;
 import jp.co.sss.lms.dto.LoginUserDto;
 import jp.co.sss.lms.form.AttendanceForm;
+import jp.co.sss.lms.form.DailyAttendanceForm;
 import jp.co.sss.lms.service.StudentAttendanceService;
 import jp.co.sss.lms.util.AttendanceUtil;
 import jp.co.sss.lms.util.Constants;
@@ -131,9 +132,7 @@ public class AttendanceController {
 				.setAttendanceForm(attendanceManagementDtoList);
 		AttendanceUtil attendanceUtil = new AttendanceUtil();
 		attendanceForm.setBlankTimes(attendanceUtil.setBlankTime());
-
 		attendanceForm.setHourMap(attendanceUtil.setHour());
-
 		attendanceForm.setMinuteMap(attendanceUtil.setMinute());
 		model.addAttribute("attendanceForm", attendanceForm);
 
@@ -153,32 +152,104 @@ public class AttendanceController {
 	public String complete(AttendanceForm attendanceForm, Model model, BindingResult result)
 	        throws ParseException {
 
-	    // Task.26: 時・分をhh:mm形式に変換　スレスタスラクサ
-	    attendanceForm.getAttendanceList().forEach(dailyAttendanceForm -> {
+		// Task.26: 時・分をhh:mm形式に変換　スレスタスラクサ
+		attendanceForm.getAttendanceList().forEach(dailyAttendanceForm -> {
 
-	        if (dailyAttendanceForm.getTrainingStartTimeHour() != null
-	                && dailyAttendanceForm.getTrainingStartTimeMinute() != null) {
+		    if (dailyAttendanceForm.getTrainingStartTimeHour() != null
+		            && dailyAttendanceForm.getTrainingStartTimeMinute() != null) {
 
-	            dailyAttendanceForm.setTrainingStartTime(
-	                    String.format("%02d:%02d",
-	                            dailyAttendanceForm.getTrainingStartTimeHour(),
-	                            dailyAttendanceForm.getTrainingStartTimeMinute()));
-	        }
+		        dailyAttendanceForm.setTrainingStartTime(
+		                String.format("%02d:%02d",dailyAttendanceForm.getTrainingStartTimeHour(), dailyAttendanceForm.getTrainingStartTimeMinute()));
+		    }
 
-	        if (dailyAttendanceForm.getTrainingEndTimeHour() != null
-	                && dailyAttendanceForm.getTrainingEndTimeMinute() != null) {
+		    if (dailyAttendanceForm.getTrainingEndTimeHour() != null&& dailyAttendanceForm.getTrainingEndTimeMinute() != null) {
+		        dailyAttendanceForm.setTrainingEndTime(
+		                String.format("%02d:%02d", dailyAttendanceForm.getTrainingEndTimeHour(),
+		                        dailyAttendanceForm.getTrainingEndTimeMinute()));
+		    }
+		});
+		// Task.27: 勤怠入力チェック
+		for (int i = 0; i < attendanceForm.getAttendanceList().size(); i++) {
 
-	            dailyAttendanceForm.setTrainingEndTime(
-	                    String.format("%02d:%02d",
-	                            dailyAttendanceForm.getTrainingEndTimeHour(),
-	                            dailyAttendanceForm.getTrainingEndTimeMinute()));
-	        }
-	    });
+		    DailyAttendanceForm dailyAttendanceForm =
+		            attendanceForm.getAttendanceList().get(i);
+
+		    // a. 備考の文字数チェック
+		    if (dailyAttendanceForm.getNote() != null && dailyAttendanceForm.getNote().length() > 100) {
+		        result.rejectValue("attendanceList[" + i + "].note","maxlength",new Object[] { "備考", "100" }, null);
+		    }
+
+		    // b. 出勤時間の片側未入力チェック
+		    boolean startHourEntered = dailyAttendanceForm.getTrainingStartTimeHour() != null;
+
+		    boolean startMinuteEntered = dailyAttendanceForm.getTrainingStartTimeMinute() != null;
+
+		    if (startHourEntered != startMinuteEntered) {
+
+		        result.rejectValue("attendanceList[" + i + "].trainingStartTimeHour", "input.invalid", new Object[] { "出勤時間" }, null);
+		    }
+
+		    // c. 退勤時間の片側未入力チェック
+		    boolean endHourEntered = dailyAttendanceForm.getTrainingEndTimeHour() != null;
+		    boolean endMinuteEntered =  dailyAttendanceForm.getTrainingEndTimeMinute() != null;
+
+		    if (endHourEntered != endMinuteEntered) {
+
+		        result.rejectValue( "attendanceList[" + i + "].trainingEndTimeHour", "input.invalid", new Object[] { "退勤時間" },null);
+		    }
+
+		    boolean startTimeEntered = startHourEntered && startMinuteEntered;
+		    boolean endTimeEntered = endHourEntered && endMinuteEntered;
+
+		    // d. 出勤なし、退勤あり
+		    if (!startTimeEntered && endTimeEntered) {
+		        result.reject( "attendance.punchInEmpty");
+		    }
+
+		    // e. 出勤時間 > 退勤時間
+		    if (!result.hasErrors()&& startTimeEntered&& endTimeEntered) {
+		        int startTotalMinutes =dailyAttendanceForm.getTrainingStartTimeHour() * 60+ dailyAttendanceForm.getTrainingStartTimeMinute();
+		        int endTotalMinutes = dailyAttendanceForm.getTrainingEndTimeHour() * 60 + dailyAttendanceForm.getTrainingEndTimeMinute();
+
+		        if (startTotalMinutes > endTotalMinutes) {
+		            result.reject( "attendance.trainingTimeRange", new Object[] { i }, null);
+		        }
+		    }
+
+		    // f. 中抜け時間チェック
+		    if (startTimeEntered && endTimeEntered && dailyAttendanceForm.getBlankTime() != null) {
+
+		        int startTotalMinutes = dailyAttendanceForm.getTrainingStartTimeHour() * 60 + dailyAttendanceForm.getTrainingStartTimeMinute();
+		        int endTotalMinutes =dailyAttendanceForm.getTrainingEndTimeHour() * 60 + dailyAttendanceForm.getTrainingEndTimeMinute();
+		        int trainingTime =endTotalMinutes - startTotalMinutes;
+
+		        if (dailyAttendanceForm.getBlankTime() > trainingTime) {
+		            result.reject( "attendance.blankTimeError");
+		        }
+		    }
+		}
 
 	    // 更新
-	    String message = studentAttendanceService.update(attendanceForm);
-	    model.addAttribute("message", message);
+//	    String message = studentAttendanceService.update(attendanceForm);
+//	    model.addAttribute("message", message);
 
+		// Task.27: エラーがある場合は更新しない
+		if (result.hasErrors()) {
+
+		    AttendanceUtil attendanceUtil = new AttendanceUtil();
+		    attendanceForm.setBlankTimes(attendanceUtil.setBlankTime());
+		    attendanceForm.setHourMap( attendanceUtil.setHour());
+		    attendanceForm.setMinuteMap( attendanceUtil.setMinute());
+		    model.addAttribute("attendanceForm", attendanceForm);
+
+		    return "attendance/update";
+		}
+
+		// エラーがない場合のみ更新
+		String message =
+		        studentAttendanceService.update(attendanceForm);
+
+		model.addAttribute("message", message);
 	    // 一覧の再取得
 	    List<AttendanceManagementDto> attendanceManagementDtoList =
 	            studentAttendanceService.getAttendanceManagement(
