@@ -17,8 +17,13 @@
 	</th:block>
 	<div class="row">
 		<div class="bs-component col-sm-12">
-
-			<form th:action="@{/attendance/update}" method="post" th:object="${attendanceForm}" onsubmit="setTimes()">
+			<form th:action="@{/attendance/update}" method="post" th:object="${attendanceForm}" onsubmit="setTimes()">				
+			    <!-- Task.27: Global error messages -->
+			    <div th:if="${#fields.hasGlobalErrors()}" class="text-danger">
+			        <div th:each="error : ${#fields.globalErrors()}"
+			             th:text="${error}">
+			        </div>
+			    </div>
 				<table class="table table-hover dataTable no-footer">
 					<thead>
 						<tr>
@@ -44,14 +49,6 @@
 								</th:block>
 								<td class="w140">[[${dailyAttendanceForm.dispTrainingDate}]]</td>
 								<td class="w300">[[${dailyAttendanceForm.sectionName}]]</td>
-								
-								<!--as per requirement for Task 26, chages is made in html in order to display time in hour amd minutes-->
-<!--								<td class="w70">-->
-<!--									<input type="text" th:name="|attendanceList[${stat.index}].trainingStartTime|"-->
-<!--									th:value="${dailyAttendanceForm.trainingStartTime}" class="form-control" />-->
-<!--								</td>-->
-
-								<!-- 出勤 -->
 								<td class="w70">								
 								    <div style="display: flex; align-items: center; gap: 5px;">								
 								        <select th:field="*{attendanceList[__${stat.index}__].trainingStartTimeHour}"
@@ -60,8 +57,9 @@
 								            <option th:each="hour : ${attendanceForm.hourMap}"
 								                    th:value="${hour.key}"
 								                    th:text="${hour.value}">
-								            </option>								
-								        </select>								
+								            </option>								            					
+								        </select>	
+								        <span th:errors="*{attendanceList[__${stat.index}__].trainingStartTimeHour}"class="text-danger"></span>										
 								        <span style="font-size: 18px;">:</span>								
 								        <select th:field="*{attendanceList[__${stat.index}__].trainingStartTimeMinute}"
 								                class="form-control"
@@ -69,8 +67,9 @@
 								            <option th:each="minute : ${attendanceForm.minuteMap}"
 								                    th:value="${minute.key}"
 								                    th:text="${minute.value}">
-								            </option>								
-								        </select>								
+								            </option>								            					
+								        </select>
+								        <span th:errors="*{attendanceList[__${stat.index}__].trainingStartTimeMinute}" class="text-danger"></span>										
 								    </div>								
 								</td>	
 								<!-- 退勤 -->								
@@ -81,15 +80,16 @@
 								                style="width: 80px; height: 38px;">
 								            <option th:each="hour : ${attendanceForm.hourMap}" th:value="${hour.key}"th:text="${hour.value}">
 								            </option>								
-								        </select>								
+								        </select>	
+								        <span th:errors="*{attendanceList[__${stat.index}__].trainingEndTimeHour}" class="text-danger"></span>					
 								        <span style="font-size: 18px;">:</span>								
 								        <select th:field="*{attendanceList[__${stat.index}__].trainingEndTimeMinute}"
 								                class="form-control"
 								                style="width: 80px; height: 38px;">								
 								            <option th:each="minute : ${attendanceForm.minuteMap}" th:value="${minute.key}" th:text="${minute.value}">
-								            </option>
-							
-								        </select>								
+								            </option>							
+								        </select>
+								        <span th:errors="*{attendanceList[__${stat.index}__].trainingEndTimeMinute}"class="text-danger"></span>
 								    </div>
 								</td>
 								<td class="w80">
@@ -100,7 +100,6 @@
 								</td>
 								<td class="w70">[[${dailyAttendanceForm.statusDispName}]]</td>
 								<td class="w240">
-									<input type="text" th:name="|attendanceList[${stat.index}].note|" th:value="${dailyAttendanceForm.note}" class="form-control"></input>
 								</td>
 							</tr>
 						</th:block>
@@ -116,7 +115,6 @@
 					</th:block>
 					<input type="submit" value="更新" name="complete" class="btn btn-info" onclick="return confirm('更新します。よろしいですか？');"/>
 				</div>
-
 			</form>
 		</div>
 	</div>

@@ -49,7 +49,6 @@ public class AttendanceController {
 	            studentAttendanceService.getAttendanceManagement(
 	                    loginUserDto.getCourseId(),
 	                    loginUserDto.getLmsUserId());
-
 	    model.addAttribute("attendanceManagementDtoList",
 	            attendanceManagementDtoList);
 
@@ -173,37 +172,116 @@ public class AttendanceController {
 
 		    DailyAttendanceForm dailyAttendanceForm =
 		            attendanceForm.getAttendanceList().get(i);
+//		    System.out.println(
+//		            "Start Hour = " + dailyAttendanceForm.getTrainingStartTimeHour()
+//		    );
+//
+//		    System.out.println(
+//		            "Start Minute = " + dailyAttendanceForm.getTrainingStartTimeMinute()
+//		    );
 
 		    // a. 備考の文字数チェック
 		    if (dailyAttendanceForm.getNote() != null && dailyAttendanceForm.getNote().length() > 100) {
-		        result.rejectValue("attendanceList[" + i + "].note","maxlength",new Object[] { "備考", "100" }, null);
-		    }
+		    	result.rejectValue(
+		    		    "attendanceList[" + i + "].note",
+		    		    "attendance.note.maxlength",
+		    		    null,
+		    		    "備考は100文字以内で入力してください。"
+		    		);		    }
 
 		    // b. 出勤時間の片側未入力チェック
-		    boolean startHourEntered = dailyAttendanceForm.getTrainingStartTimeHour() != null;
+//		    boolean startHourEntered = dailyAttendanceForm.getTrainingStartTimeHour() != null;
+//
+//		    boolean startMinuteEntered = dailyAttendanceForm.getTrainingStartTimeMinute() != null;
+//
+//		    if (startHourEntered != startMinuteEntered) {
+//
+//		        result.rejectValue("attendanceList[" + i + "].trainingStartTimeHour", "input.invalid", new Object[] { "出勤時間" }, null);
+//		    }
 
-		    boolean startMinuteEntered = dailyAttendanceForm.getTrainingStartTimeMinute() != null;
+		    boolean startHourEntered =
+		            dailyAttendanceForm.getTrainingStartTimeHour() != null;
 
-		    if (startHourEntered != startMinuteEntered) {
+		    boolean startMinuteEntered =
+		            dailyAttendanceForm.getTrainingStartTimeMinute() != null;
 
-		        result.rejectValue("attendanceList[" + i + "].trainingStartTimeHour", "input.invalid", new Object[] { "出勤時間" }, null);
+		    // 時だけ入力されている
+		    if (startHourEntered && !startMinuteEntered) {
+
+		        result.rejectValue(
+		                "attendanceList[" + i + "].trainingStartTimeMinute",
+		                "input.invalid.minute",
+		                null,
+		                "出勤時間の分を入力してください。"
+		        );
 		    }
 
+		    // 分だけ入力されている
+		    if (!startHourEntered && startMinuteEntered) {
+
+		        result.rejectValue(
+		                "attendanceList[" + i + "].trainingStartTimeHour",
+		                "input.invalid.hour",
+		                null,
+		                "出勤時間の時を入力してください。"
+		        );
+		    }
 		    // c. 退勤時間の片側未入力チェック
-		    boolean endHourEntered = dailyAttendanceForm.getTrainingEndTimeHour() != null;
-		    boolean endMinuteEntered =  dailyAttendanceForm.getTrainingEndTimeMinute() != null;
+//		    boolean endHourEntered = dailyAttendanceForm.getTrainingEndTimeHour() != null;
+//		    boolean endMinuteEntered =  dailyAttendanceForm.getTrainingEndTimeMinute() != null;
+//
+//		    if (endHourEntered != endMinuteEntered) {
+//
+//		        result.rejectValue( "attendanceList[" + i + "].trainingEndTimeHour", "input.invalid", new Object[] { "退勤時間" },null);
+//		    }
+		    
+		    boolean endHourEntered =
+		            dailyAttendanceForm.getTrainingEndTimeHour() != null;
 
-		    if (endHourEntered != endMinuteEntered) {
+		    boolean endMinuteEntered =
+		            dailyAttendanceForm.getTrainingEndTimeMinute() != null;
 
-		        result.rejectValue( "attendanceList[" + i + "].trainingEndTimeHour", "input.invalid", new Object[] { "退勤時間" },null);
+		    // 時だけ入力されている
+		    if (endHourEntered && !endMinuteEntered) {
+
+		        result.rejectValue(
+		                "attendanceList[" + i + "].trainingEndTimeMinute",
+		                "input.invalid.minute",
+		                null,
+		                "退勤時間の分を入力してください。"
+		        );
+		    }
+
+		    // 分だけ入力されている
+		    if (!endHourEntered && endMinuteEntered) {
+
+		        result.rejectValue(
+		                "attendanceList[" + i + "].trainingEndTimeHour",
+		                "input.invalid.hour",
+		                null,
+		                "退勤時間の時を入力してください。"
+		        );
 		    }
 
 		    boolean startTimeEntered = startHourEntered && startMinuteEntered;
 		    boolean endTimeEntered = endHourEntered && endMinuteEntered;
 
 		    // d. 出勤なし、退勤あり
+//		    if (!startTimeEntered && endTimeEntered) {
+//		        result.reject( "attendance.punchInEmpty");
+//		    }
+		 // d. 出勤なし、退勤あり
 		    if (!startTimeEntered && endTimeEntered) {
-		        result.reject( "attendance.punchInEmpty");
+
+		        result.reject("attendance.punchInEmpty");
+
+		    }
+
+		    // 出勤あり、退勤なし
+		    if (startTimeEntered && !endTimeEntered) {
+
+		        result.reject("attendance.punchOutEmpty");
+
 		    }
 
 		    // e. 出勤時間 > 退勤時間

@@ -92,6 +92,7 @@ public class StudentAttendanceService {
 	            Constants.DB_FLG_FALSE);
 
 	    // 件数が0より大きければtrue
+	    
 	    return notEnterCount != null && notEnterCount > 0;
 	}
 
@@ -251,7 +252,6 @@ public class StudentAttendanceService {
 			attendanceForm.setDispLeaveDate(
 					dateUtil.dateToString(loginUserDto.getLeaveDate(), "yyyy年M月d日"));
 		}
-
 		// 勤怠管理リストの件数分、日次の勤怠フォームに移し替え
 		for (AttendanceManagementDto attendanceManagementDto : attendanceManagementDtoList) {
 			DailyAttendanceForm dailyAttendanceForm = new DailyAttendanceForm();
@@ -261,33 +261,25 @@ public class StudentAttendanceService {
 					.setTrainingDate(dateUtil.toString(attendanceManagementDto.getTrainingDate()));
 			dailyAttendanceForm
 					.setTrainingStartTime(attendanceManagementDto.getTrainingStartTime());
-			dailyAttendanceForm.setTrainingEndTime(attendanceManagementDto.getTrainingEndTime());
-			
+			dailyAttendanceForm.setTrainingEndTime(attendanceManagementDto.getTrainingEndTime());		
 			
 //Task 26　スレスタスラクサ　
 			String timeString = attendanceManagementDto.getTrainingStartTime();
 
 			if (timeString != null && !timeString.isEmpty()) {
-
 			    Integer startHour = Integer.parseInt(timeString.substring(0, 2));
 			    Integer startMinute = Integer.parseInt(timeString.substring(3, 5));
-
 			    dailyAttendanceForm.setTrainingStartTimeHour(startHour);
 			    dailyAttendanceForm.setTrainingStartTimeMinute(startMinute);
 			}
-
 			timeString = attendanceManagementDto.getTrainingEndTime();
-
 			if (timeString != null && !timeString.isEmpty()) {
-
 			    Integer endHour = Integer.parseInt(timeString.substring(0, 2));
 			    Integer endMinute = Integer.parseInt(timeString.substring(3, 5));
-
 			    dailyAttendanceForm.setTrainingEndTimeHour(endHour);
 			    dailyAttendanceForm.setTrainingEndTimeMinute(endMinute);
 			}
 			
-
 //Task 26 これ変更
 			if (attendanceManagementDto.getBlankTime() != null) {
 				dailyAttendanceForm.setBlankTime(attendanceManagementDto.getBlankTime());
@@ -301,7 +293,6 @@ public class StudentAttendanceService {
 			dailyAttendanceForm.setDispTrainingDate(dateUtil
 					.dateToString(attendanceManagementDto.getTrainingDate(), "yyyy年M月d日(E)"));
 			dailyAttendanceForm.setStatusDispName(attendanceManagementDto.getStatusDispName());
-
 			attendanceForm.getAttendanceList().add(dailyAttendanceForm);
 		}
 
@@ -353,11 +344,8 @@ public class StudentAttendanceService {
 			TrainingTime trainingEndTime = null;
 			trainingEndTime = new TrainingTime(dailyAttendanceForm.getTrainingEndTime());
 			tStudentAttendance.setTrainingEndTime(trainingEndTime.getFormattedString());
-			
-						
-
+								
 //			
-
 			// 中抜け時間
 			tStudentAttendance.setBlankTime(dailyAttendanceForm.getBlankTime());
 			// 遅刻早退ステータス
