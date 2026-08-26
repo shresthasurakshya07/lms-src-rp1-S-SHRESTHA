@@ -83,12 +83,12 @@
         setInterval(function() {
             $("#now").text('現在の時刻は　' + getClock() + '　です。');
         }, 1000);
-
+//再レビュー　hasMissingPastAttendance をnotEnterCountに交換
         /* Task.25 スレスタスラクサ*/
-        const hasMissingPastAttendance =
-            /*[[${hasMissingPastAttendance}]]*/ false;
+        const notEnterCount =
+            /*[[${notEnterCount}]]*/ false;
 
-        if (hasMissingPastAttendance) {
+        if (notEnterCount) {
             alert('過去日の勤怠に未入力があります。');
         }
     });

@@ -74,11 +74,11 @@ public interface TStudentAttendanceMapper {
 	 * @return 過去日の未入力件数
 	 */
 //	Task 25
+//	再レビュー　countermissing　notEnterCount　に交換
 	Integer notEnterCount(
-			@Param("courseId") Integer courseId,
-			@Param("lmsUserId") Integer lmsUserId,
-			@Param("currentDate") Date currentDate,
-			@Param("deleteFlg") Short deleteFlg);
+	        @Param("lmsUserId") Integer lmsUserId,
+	        @Param("trainingDate") Date trainingDate,
+	        @Param("deleteFlg") Short deleteFlg);
 
 }
 

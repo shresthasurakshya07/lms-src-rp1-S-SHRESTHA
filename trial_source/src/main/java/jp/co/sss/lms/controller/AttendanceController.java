@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -17,6 +18,7 @@ import jp.co.sss.lms.form.DailyAttendanceForm;
 import jp.co.sss.lms.service.StudentAttendanceService;
 import jp.co.sss.lms.util.AttendanceUtil;
 import jp.co.sss.lms.util.Constants;
+
 /**
  * 勤怠管理コントローラ
  * 
@@ -31,7 +33,6 @@ public class AttendanceController {
 	private StudentAttendanceService studentAttendanceService;
 	@Autowired
 	private LoginUserDto loginUserDto;
-
 	/**
 	 * 勤怠管理画面 初期表示
 	 * 
@@ -41,8 +42,8 @@ public class AttendanceController {
 	 * @return 勤怠管理画面
 	 * @throws ParseException
 	 */
-	@RequestMapping(path = "/detail", method = RequestMethod.GET)
-	public String index(Model model) {
+	@GetMapping("/detail")
+	public String index(Model model) throws ParseException {
 
 	    // 勤怠一覧の取得
 	    List<AttendanceManagementDto> attendanceManagementDtoList =
@@ -53,11 +54,10 @@ public class AttendanceController {
 	            attendanceManagementDtoList);
 
 	    // スレスタスラクサ　task.25 過去日の未入力確認
-	    boolean hasMissingPastAttendance =
-	            studentAttendanceService.hasMissingPastAttendance();
-
-	    model.addAttribute("hasMissingPastAttendance",
-	            hasMissingPastAttendance);
+	    boolean notEnterCount =
+	            studentAttendanceService.notEnterCount();
+//再レビュー　hasMissingPastAttendance をnotEnterCountに修正
+	    model.addAttribute("notEnterCount",notEnterCount);
 
 	    return "attendance/detail";
 	}

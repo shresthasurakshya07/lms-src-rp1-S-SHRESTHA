@@ -1,6 +1,7 @@
 package jp.co.sss.lms.service;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -77,22 +78,25 @@ public class StudentAttendanceService {
 	 * 過去日の未入力チェック
 	 *
 	 * @return 過去日の未入力がある場合true
+	 * @throws ParseException 
 	 */
 //	Task 25 スレスタスラクサ
-	public boolean hasMissingPastAttendance() {
-
-	    // 今日の日付を取得
-	    Date currentDate = new Date();
-
-	    // 未入力件数を取得
-	    Integer notEnterCount = tStudentAttendanceMapper.notEnterCount(
-	            loginUserDto.getCourseId(),
+	public boolean notEnterCount() throws ParseException {
+	  
+//　再レビュー Task25 スレスタスラクサ
+//	    currentDate　を　SimpleDateFormatクラスでフォーマットパターンを設定
+		   Date currentDate = new Date();
+		    // SimpleDateFormatクラスでフォーマットパターンを設定
+		    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		    // フォーマットした日付をDate型に変換
+		    Date trainingDate = sdf.parse(sdf.format(currentDate));	    // 未入力件数を取得
+	    Integer notEnterCount = tStudentAttendanceMapper.notEnterCount(	            
 	            loginUserDto.getLmsUserId(),
-	            currentDate,
+	            trainingDate,
 	            Constants.DB_FLG_FALSE);
 
 	    // 件数が0より大きければtrue
-	    
+	  //再レビュー　hasMissingPastAttendance をnotEnterCountに修正
 	    return notEnterCount != null && notEnterCount > 0;
 	}
 

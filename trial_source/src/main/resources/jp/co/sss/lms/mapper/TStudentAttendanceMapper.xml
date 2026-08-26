@@ -42,18 +42,21 @@
 
 
 <!--Task 25　スレスタ　スラクサ　-->
-
+<!--ｃounter missing  notEnterCount に 変換-->
+<!--counter(*) m_section 設計書通り修正-->
 <select id="notEnterCount" resultType="int">
-	SELECT COUNT(DISTINCT CAST(t1.date AS DATE))
-	FROM m_section t1
-	LEFT OUTER JOIN t_student_attendance t2
-		ON t2.lms_user_id = #{lmsUserId}
-		AND CAST(t1.date AS DATE) = CAST(t2.training_date AS DATE)
-		AND t2.delete_flg = #{deleteFlg}
-	WHERE t1.course_id = #{courseId}
-		AND t1.date &lt; #{currentDate}
-		AND t1.delete_flg = #{deleteFlg}
-		AND t2.student_attendance_id IS NULL
+    SELECT COUNT(*)
+    FROM t_student_attendance
+    WHERE lms_user_id = #{lmsUserId}
+      AND delete_flg = #{deleteFlg}
+      AND training_date &lt; #{trainingDate}
+      AND status != 1
+      AND (
+          training_start_time = ''
+          OR training_end_time = ''
+          OR training_start_time IS NULL
+          OR training_end_time IS NULL
+      )
 </select>
 
 	<insert id="insert" parameterType="jp.co.sss.lms.entity.TStudentAttendance" useGeneratedKeys="true" keyProperty="studentAttendanceId">
