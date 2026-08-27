@@ -9,6 +9,7 @@ import java.util.List;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 
 import jp.co.sss.lms.dto.AttendanceManagementDto;
 import jp.co.sss.lms.dto.LoginUserDto;
@@ -382,5 +383,112 @@ public class StudentAttendanceService {
 		// 完了メッセージ
 		return messageUtil.getMessage(Constants.PROP_KEY_ATTENDANCE_UPDATE_NOTICE);
 	}
+	/**
+	 * 勤怠入力チェック
+	 *
+	 * @param attendanceForm 勤怠フォーム
+	 * @param result BindingResult
+	 */
+//	Task 27 スレスタスラクサ
+	public void updateInputCheck(AttendanceForm attendanceForm, BindingResult result) {
+	    for (int i = 0; i < attendanceForm.getAttendanceList().size(); i++) {
+	        DailyAttendanceForm dailyAttendanceForm =
+	                attendanceForm.getAttendanceList().get(i);
 
+	        boolean hasInput =
+	                dailyAttendanceForm.getTrainingStartTimeHour() != null
+	                || dailyAttendanceForm.getTrainingStartTimeMinute() != null
+	                || dailyAttendanceForm.getTrainingEndTimeHour() != null
+	                || dailyAttendanceForm.getTrainingEndTimeMinute() != null
+	                || dailyAttendanceForm.getBlankTime() != null
+	                || (dailyAttendanceForm.getNote() != null
+	                    && !dailyAttendanceForm.getNote().isEmpty());
+
+	        if (!hasInput) {
+	            continue;
+	        }
+	        // a. 備考
+	        if (dailyAttendanceForm.getNote() != null
+	                && dailyAttendanceForm.getNote().length() > 100) {
+
+	            result.reject("attendance.noteMaxLength");
+	        }
+
+	        // b. 出勤時間
+	        boolean startHourEntered =
+	                dailyAttendanceForm.getTrainingStartTimeHour() != null;
+	        boolean startMinuteEntered =
+	                dailyAttendanceForm.getTrainingStartTimeMinute() != null;
+
+	        if (!startHourEntered && !startMinuteEntered) {
+
+	            result.reject("attendance.punchInEmpty");
+
+	        } else if (!startHourEntered && startMinuteEntered) {
+
+	            result.reject("attendance.startTimeHourEmpty");
+
+	        } else if (startHourEntered && !startMinuteEntered) {
+
+	            result.reject("attendance.startTimeMinuteEmpty");
+	        }
+
+	        // c. 退勤時間
+	        boolean endHourEntered =
+	                dailyAttendanceForm.getTrainingEndTimeHour() != null;
+	        boolean endMinuteEntered =
+	                dailyAttendanceForm.getTrainingEndTimeMinute() != null;
+
+	        if (!endHourEntered && !endMinuteEntered) {
+
+	            result.reject("attendance.punchOutEmpty");
+
+	        } else if (!endHourEntered && endMinuteEntered) {
+
+	            result.reject("attendance.endTimeHourEmpty");
+
+	        } else if (endHourEntered && !endMinuteEntered) {
+
+	            result.reject("attendance.endTimeMinuteEmpty");
+	        }
+	        boolean startTimeEntered =
+	                startHourEntered && startMinuteEntered;
+	        boolean endTimeEntered =
+	                endHourEntered && endMinuteEntered;
+
+	        // d. 出勤なし、退勤あり
+	        if (!startTimeEntered && endTimeEntered) {
+	            result.reject("attendance.punchInEmpty");
+	        }
+	        // 出勤あり、退勤なし
+	        if (startTimeEntered && !endTimeEntered) {
+	            result.reject("attendance.punchOutEmpty");
+	        }
+	        // e. 出勤 > 退勤
+	        if (startTimeEntered && endTimeEntered) {
+
+	            int startTotalMinutes =
+	                    dailyAttendanceForm.getTrainingStartTimeHour() * 60
+	                    + dailyAttendanceForm.getTrainingStartTimeMinute();
+	            int endTotalMinutes =
+	                    dailyAttendanceForm.getTrainingEndTimeHour() * 60
+	                    + dailyAttendanceForm.getTrainingEndTimeMinute();
+	            if (startTotalMinutes > endTotalMinutes) {
+	                result.reject("attendance.trainingTimeRange");
+	            }
+
+	            // f. 中抜け時間
+	            if (dailyAttendanceForm.getBlankTime() != null) {
+
+	                int trainingTime =
+	                        endTotalMinutes - startTotalMinutes;
+
+	                if (dailyAttendanceForm.getBlankTime() > trainingTime) {
+
+	                    result.reject("attendance.blankTimeError");
+	                }
+	            }
+	        }
+	    }
+	}
 }
