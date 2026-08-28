@@ -420,11 +420,12 @@ public class StudentAttendanceService {
 	        boolean startMinuteEntered =
 	                dailyAttendanceForm.getTrainingStartTimeMinute() != null;
 
-	        if (!startHourEntered && !startMinuteEntered) {
-
-	            result.reject("attendance.punchInEmpty");
-
-	        } else if (!startHourEntered && startMinuteEntered) {
+//	        if (!startHourEntered && !startMinuteEntered) {
+//
+//	            result.reject("attendance.punchInEmpty");
+//
+//	        } else 
+	        	if (!startHourEntered && startMinuteEntered) {
 
 	            result.reject("attendance.startTimeHourEmpty");
 
@@ -438,12 +439,13 @@ public class StudentAttendanceService {
 	                dailyAttendanceForm.getTrainingEndTimeHour() != null;
 	        boolean endMinuteEntered =
 	                dailyAttendanceForm.getTrainingEndTimeMinute() != null;
-
-	        if (!endHourEntered && !endMinuteEntered) {
-
-	            result.reject("attendance.punchOutEmpty");
-
-	        } else if (!endHourEntered && endMinuteEntered) {
+//
+//	        if (!endHourEntered && !endMinuteEntered) {
+//
+//	            result.reject("attendance.punchOutEmpty");
+//
+//	        } else 
+	        	if (!endHourEntered && endMinuteEntered) {
 
 	            result.reject("attendance.endTimeHourEmpty");
 
